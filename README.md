@@ -1,4 +1,6 @@
-# p2signal
+# SDPmin
+
+an SDP compressor
 
 A library that compresses WebRTC signaling data into smaller codes.
 
@@ -10,7 +12,7 @@ In order for WebRTC, a peer-to-peer communication library, to communicate with o
 Stun servers are servers (usually free) that allow for peers to get their own IP. These are required.
 
 ### Signaling
-In order for peers to connect to other peers, they need a signaling server that transmits this simply. 
+In order for peers to connect to other peers, they need a signaling server that transmits this simply. These servers transmit large SDP offers
 
 **This** is what this project aims to replace, as the data provided can be over a few kilobytes.
 This compresses them to as small as possible to fit easily in a QR code.
