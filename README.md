@@ -1,6 +1,6 @@
 # SDPmin
 
-an SDP compressor
+an SDP compressor that bundles ICE candidates in one go.
 
 A library that compresses WebRTC signaling data into smaller codes.
 

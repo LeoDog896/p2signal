@@ -9,11 +9,13 @@
 
   let readyToChat = false
   let canvas: HTMLCanvasElement
+  $: canvasText = globalThis.location ? location.href : "https://example.com"
+
+  $: if (globalThis.location && canvas) renderCanvas(canvasText, canvas)
 
   onMount(() => {
-    const rtc = new RTCPeerConnection({ 'iceServers': [{ urls: "stun:stun.gmx.net" }] })
-
-    renderCanvas("https://example.com", canvas)
+    // Create the self's peer connection.
+    const rtc = new RTCPeerConnection({ 'iceServers': [{ urls: "stun:stun.l.google.com:19302" }] })
 
     rtc.addEventListener("icecandidate", () => {
 
