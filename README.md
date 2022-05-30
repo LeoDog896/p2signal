@@ -1,8 +1,37 @@
-# SDPmin
+# peer
 
-an SDP compressor that bundles ICE candidates in one go.
+A wrapper around WebRTC that implements self-identification and multilpe connections between peers.
 
-A library that compresses WebRTC signaling data into smaller codes.
+This contains two modules: `PeerConnection`, the low-level API that acts similarly to `peer-simple`, and `Peer`, a high-level substitute
+that allows for peers to identify themselves between reconnects and connect to multiple peers.
+## usage & implementation
+
+<details>
+  <summary>Two Peers</summary>
+
+  ```ts
+  // psuedo sending api: send(key, value). on(key, value => void)
+
+  { // peer 1
+    const peer = await createPeer()
+
+    send("description", peer.description)
+
+    on("description", description => {
+      await peer.connect(description)
+    })
+  }
+
+  { // peer 2
+    const peer = await createPeer()
+
+    on("description", description => {
+      const response = await peer.connect(description);
+      send("description", response)
+    })
+  }
+  ```
+</details>
 
 ## what?
 
@@ -23,13 +52,6 @@ This server isnt required, but popular webrtc libraries such as Peer.js use it.
 Turn servers are optional and act as fallback servers for communication. These are only
 occasioally used.
 
-## why?
+## References
 
-The ultimate goal of this project (and further research) is to make serverless networking on the web.
-
-Based off of https://github.com/lesmana/webrtc-without-signaling-server
-
-## demo
-
-This demo uses the library to create a simple 2 person direct chat room.
-It's limited to this as anything further is the goal of other p2p libs.
+Based off of https://github.com/LeoDog896/p2signal

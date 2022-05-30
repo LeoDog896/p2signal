@@ -9,17 +9,21 @@
 
   let readyToChat = false
   let canvas: HTMLCanvasElement
-  $: canvasText = globalThis.location ? location.href : "https://example.com"
 
-  $: if (globalThis.location && canvas) renderCanvas(canvasText, canvas)
+  let offer = ""
 
-  onMount(() => {
+  $: canvasText = globalThis.location ? location.href + "#" + offer : ""
+
+  $: if (globalThis.location && canvas) {
+    canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height)
+    renderCanvas(canvasText, canvas)
+  }
+
+  onMount(async () => {
     // Create the self's peer connection.
-    const rtc = new RTCPeerConnection({ 'iceServers': [{ urls: "stun:stun.l.google.com:19302" }] })
+    const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] })
 
-    rtc.addEventListener("icecandidate", () => {
-
-    })
+    offer = JSON.stringify(await peerConnection.createOffer())
   })
 
   let messages: { author: Author, message: string }[] = []
@@ -45,5 +49,8 @@
     <div class="m-5 border w-min h-min mx-auto border-gray-200">
       <canvas class="m-5" bind:this={canvas} width=200 height=200></canvas>
     </div>
+    <p class="w-full text-center"><b>OR</b> give this text to them: <input bind:value={offer} type="text" readonly class="border-b border-black"/></p>
+
+    <p class="w-full text-center mb-4"><b>AND/OR</b> paste the text from them: <input type="text" class="border-b border-black"/></p>
   {/if}
 </div>
