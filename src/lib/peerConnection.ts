@@ -1,10 +1,17 @@
-interface PeerConnection {
+type PeerConnectionType = "offerer" | "answerer"
+
+type PeerConnection = {
   connection: RTCPeerConnection;
+  connect: (description: RTCSessionDescription) => Promise<void>
+} & ({
+  type: Extract<PeerConnectionType, "offerer">,
   offer: RTCSessionDescriptionInit;
   description: RTCSessionDescription;
-}
+} | {
+  type: Extract<PeerConnectionType, "answerer">
+})
 
-interface PeerOptions {
+interface PeerConnectionOptions {
   iceServers: RTCIceServer[] | string[];
 }
 
@@ -21,7 +28,7 @@ const waitForIceCandidates = (connection: RTCPeerConnection): Promise<RTCSession
   })
 })
 
-export const createPeerConnection = async (options: Partial<PeerOptions>): Promise<PeerConnection> => {
+export const createPeerConnection = async (type: PeerConnectionType, options: Partial<PeerConnectionOptions>): Promise<PeerConnection> => {
 
   const iceServers = options.iceServers?.map(server => typeof server == "string" ? { urls: server } : server) 
     ?? [{ urls: "stun:stun.l.google.com:19302" }];
@@ -30,13 +37,23 @@ export const createPeerConnection = async (options: Partial<PeerOptions>): Promi
     iceServers
   });
 
-  const offer = await connection.createOffer()
+  if (type == "offerer") {
+    const offer = await connection.createOffer()
+    await connection.setLocalDescription(offer);
+    const description = await waitForIceCandidates(connection);
 
-  const description = await waitForIceCandidates(connection);
+    return {
+      type: "offerer",
+      connection,
+      offer,
+      description,
+      connect: async (description) => void 0
+    }
+  }
 
   return {
+    type: "answerer",
     connection,
-    offer,
-    description
+    connect: async (description) => void 0
   }
 }

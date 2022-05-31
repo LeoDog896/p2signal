@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { renderCanvas } from "scannable"
 
   enum Author {
     SELF,
@@ -8,16 +7,8 @@
   }
 
   let readyToChat = false
-  let canvas: HTMLCanvasElement
 
   let offer = ""
-
-  $: canvasText = globalThis.location ? location.href + "#" + offer : ""
-
-  $: if (globalThis.location && canvas) {
-    canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height)
-    renderCanvas(canvasText, canvas)
-  }
 
   onMount(async () => {
     // Create the self's peer connection.
@@ -45,12 +36,8 @@
     {/if}
   {:else}
     <p class="text-2xl font-bold w-full text-center border-b border-red-300 border-dashed pb-3 mb-4">No one is connected.</p>
-    <p class="w-full text-center">Have a friend scan the QR code below <span class="font-bold">OR</span> scan their QR code.</p>
-    <div class="m-5 border w-min h-min mx-auto border-gray-200">
-      <canvas class="m-5" bind:this={canvas} width=200 height=200></canvas>
-    </div>
-    <p class="w-full text-center"><b>OR</b> give this text to them: <input bind:value={offer} type="text" readonly class="border-b border-black"/></p>
+    <p class="w-full text-center">Give this text to a friend: <input bind:value={offer} type="text" readonly class="bg-transparent border-b border-black"/></p>
 
-    <p class="w-full text-center mb-4"><b>AND/OR</b> paste the text from them: <input type="text" class="border-b border-black"/></p>
+    <p class="w-full text-center mb-4"><b>AND/OR</b> paste the text from them: <input type="text" class="bg-transparent border-b border-black"/></p>
   {/if}
 </div>

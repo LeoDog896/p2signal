@@ -7,13 +7,13 @@ that allows for peers to identify themselves between reconnects and connect to m
 ## usage & implementation
 
 <details>
-  <summary>Two Peers</summary>
+  <summary>Low Level: Two Peers</summary>
 
   ```ts
   // psuedo sending api: send(key, value). on(key, value => void)
 
   { // peer 1
-    const peer = await createPeer()
+    const peer = await createPeerConnection()
 
     send("description", peer.description)
 
@@ -23,7 +23,7 @@ that allows for peers to identify themselves between reconnects and connect to m
   }
 
   { // peer 2
-    const peer = await createPeer()
+    const peer = await createPeerConnection()
 
     on("description", description => {
       const response = await peer.connect(description);
