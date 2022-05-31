@@ -1,14 +1,14 @@
 type OptionalIfUndefined<T> = (T extends undefined ? [] : never) | [T];
 
 export interface EventSystem<
-  K extends Record<string, unknown>
+  K extends { [key: string]: unknown }
 > {
   on<E extends keyof K>(key: E, callback: (...[event]: OptionalIfUndefined<K[E]>) => void): void;
   trigger<E extends keyof K>(key: E, ...[value]: OptionalIfUndefined<K[E]>): void;
 }
 
 export function eventSystemFactory<
-  K extends Record<string, unknown> 
+  K extends { [key: string]: unknown } 
 >(): EventSystem<K> {
 
   const listeners: { 

@@ -1,0 +1,91 @@
+<!-- A raw example of peer connection. Essentially a port of stun-only-rtc with this library. -->
+<script lang="ts">
+  import { createPeerConnection, type AnswererPeerConnection, type OffererPeerConnection } from "$lib/peerConnection"
+  
+  let messages: { author: "us" | "them", message: string }[] = []
+
+  let localOffer = "";
+  let localAnswer = "";
+  let remoteOffer = "";
+  let remoteAnswer = "";
+
+  let chatMessage = ""
+
+  let activeRoom: "create" | "bob" | "alice" | "chat" = "create"
+  let activeChat: RTCDataChannel;
+
+  let bob: OffererPeerConnection;
+  let alice: AnswererPeerConnection;
+
+  async function activateBob() {
+    activeRoom = "bob"
+    bob = await createPeerConnection("offerer")
+
+    localOffer = JSON.stringify(bob.description);
+
+    bob.on("connect", channel => {
+      activeRoom = "chat";
+      activeChat = channel;
+    })
+
+    bob.on("message", message => messages = [...messages, { author: "them", message }])
+  }
+
+  async function activateAlice() {
+    activeRoom = "alice"
+    alice = await createPeerConnection("answerer")
+
+    alice.on("connect", channel => {
+      activeRoom = "chat";
+      activeChat = channel;
+    })
+
+    alice.on("message", message => messages = [...messages, { author: "them", message }])
+  }
+</script>
+<div class="m-8">
+  <div class:hidden={activeRoom != "create"}>
+    <h3 class="text-xl font-bold">Create or join a room?</h3>
+    <button class="px-4 py-2 my-2 mr-2 bg-gray-200 rounded-md" on:click={activateBob}>BOB: Create</button>
+    <button class="px-4 py-2 my-2 mr-2 bg-gray-200 rounded-md" on:click={activateAlice}>ALICE: Join</button>
+  </div>
+
+  <div class:hidden={activeRoom != "bob"}>
+    <h3 class="text-xl">BOB: Send your local offer to ALICE</h3>
+    <input readonly bind:value={localOffer}>
+    <br>
+    <h3 class="text-lg">Then, paste the "answer" you received</h3>
+    <input bind:value={remoteAnswer}><br>
+    <button class="px-4 py-2 my-2 mr-2 bg-gray-200 rounded-md" on:click={() => bob.connect(JSON.parse(remoteAnswer))}>Okay, I pasted it.</button>
+  </div>
+
+  <div class:hidden={activeRoom != "alice"}>
+    <h3>ALICE: Paste the "offer" you received</h3>
+    <input bind:value={remoteOffer}><br>
+    <button class="px-4 py-2 my-2 mr-2 bg-gray-200 rounded-md" on:click={async () => {
+      localAnswer = JSON.stringify(await alice.connect(JSON.parse(remoteOffer)));
+    }}>Okay, I pasted it.</button>
+    <h3>Then, send your local answer to BOB</h3>
+    <input bind:value={localAnswer}>
+  </div>
+
+  <div class:hidden={activeRoom != "chat"}>
+    <h1 class="text-xl">Chat</h1>
+    <div>
+      {#each messages as { author, message }}
+        <span>{author}: {message}</span><br/>
+      {/each}
+    </div>
+    <input 
+      bind:value={chatMessage} 
+      placeholder="Send a message"
+      on:keypress={event => {
+        if (event.key == "Enter" && chatMessage) {
+          activeChat.send(chatMessage);
+          messages = [...messages, { author: "us", message: chatMessage }]
+          chatMessage = ""
+        }
+      }}
+    >
+  </div>
+</div>

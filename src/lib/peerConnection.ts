@@ -1,26 +1,32 @@
 import { eventSystemFactory, type EventSystem } from "./eventSystemFactory"
 
-type BaseEvents = {
-  connect: void,
-  disconnect: void,
-  error: Error
+export type BaseEvents = {
+  connect: RTCDataChannel;
+  disconnect: void;
+  message: string;
+  error: Error;
 }
 
-type PeerConnectionType = "offerer" | "answerer"
+export type PeerConnectionType = "offerer" | "answerer"
 
-type PeerConnection = {
+export type PeerConnection = {
   connection: RTCPeerConnection;
-} & ({
+} & EventSystem<BaseEvents>
+
+export type OffererPeerConnection = PeerConnection & {
   type: Extract<PeerConnectionType, "offerer">,
   offer: RTCSessionDescriptionInit;
   description: RTCSessionDescription;
+  datachannel: RTCDataChannel;
   connect: (description: RTCSessionDescription) => Promise<void>;
-} | {
+}
+
+export type AnswererPeerConnection = PeerConnection & {
   type: Extract<PeerConnectionType, "answerer">
   connect: (description: RTCSessionDescription) => Promise<RTCSessionDescription>;
-}) & EventSystem<BaseEvents>
+}
 
-interface PeerConnectionOptions {
+export interface PeerConnectionOptions {
   iceServers: RTCIceServer[] | string[];
 }
 
@@ -37,9 +43,14 @@ const waitForIceCandidates = (connection: RTCPeerConnection): Promise<RTCSession
   })
 })
 
-export const createPeerConnection = async (type: PeerConnectionType, options: Partial<PeerConnectionOptions>): Promise<PeerConnection> => {
+export async function createPeerConnection(type: "offerer", options?: Partial<PeerConnectionOptions>): Promise<OffererPeerConnection>
+export async function createPeerConnection(type: "answerer", options?: Partial<PeerConnectionOptions>): Promise<AnswererPeerConnection>
+export async function createPeerConnection(
+  type: PeerConnectionType,
+  options?: Partial<PeerConnectionOptions>
+): Promise<OffererPeerConnection | AnswererPeerConnection> {
 
-  const iceServers = options.iceServers?.map(server => typeof server == "string" ? { urls: server } : server) 
+  const iceServers = options?.iceServers?.map(server => typeof server == "string" ? { urls: server } : server) 
     ?? [{ urls: "stun:stun.l.google.com:19302" }];
 
   const connection = new RTCPeerConnection({
@@ -49,13 +60,16 @@ export const createPeerConnection = async (type: PeerConnectionType, options: Pa
   const eventSystem = eventSystemFactory<BaseEvents>()
 
   if (type == "offerer") {
+    const datachannel = connection.createDataChannel("init")
     const offer = await connection.createOffer()
     await connection.setLocalDescription(offer);
     const description = await waitForIceCandidates(connection);
 
+    datachannel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
+
     connection.addEventListener("connectionstatechange", () => {
       if (connection.connectionState === "connected") {
-        eventSystem.trigger("connect")
+        eventSystem.trigger("connect", datachannel)
       }
     })
 
@@ -64,12 +78,18 @@ export const createPeerConnection = async (type: PeerConnectionType, options: Pa
       connection,
       offer,
       description,
+      datachannel,
       connect: async (description) => {
         await connection.setRemoteDescription(description)
       },
       ...eventSystem
     }
   }
+
+  connection.addEventListener("datachannel", ({ channel }) => {
+    eventSystem.trigger("connect", channel)
+    channel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
+  })
 
   return {
     type: "answerer",
