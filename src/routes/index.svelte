@@ -1,2 +1,4 @@
-<a href="/fancy">Fancy</a>
-<a href="/raw">Raw</a>
+<p></p>
+
+<a href="/chat">Chat Example</a>
+<a href="/connection">Connection (Low-level API)</a>
