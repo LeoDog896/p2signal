@@ -12,10 +12,10 @@
   let chatMessage = ""
 
   let activeRoom: "create" | "bob" | "alice" | "chat" = "create"
-  let activeChat: RTCDataChannel;
+  let activeChat: RTCDataChannel | null = null;
 
-  let bob: OffererPeerConnection;
-  let alice: AnswererPeerConnection;
+  let bob: OffererPeerConnection | null = null;
+  let alice: AnswererPeerConnection | null = null;
 
   async function activateBob() {
     activeRoom = "bob"
@@ -29,6 +29,12 @@
     })
 
     bob.on("message", message => messages = [...messages, { author: "them", message }])
+
+    bob.on("disconnect", () => {
+      activeRoom = "create"
+      activeChat = null;
+      bob = null;
+    })
   }
 
   async function activateAlice() {
@@ -41,6 +47,12 @@
     })
 
     alice.on("message", message => messages = [...messages, { author: "them", message }])
+
+    alice.on("disconnect", () => {
+      activeRoom = "create"
+      activeChat = null;
+      alice = null;
+    })
   }
 </script>
 <div class="m-8">
@@ -56,14 +68,14 @@
     <br>
     <h3>Then, paste the "answer" you received</h3>
     <input bind:value={remoteAnswer}><br>
-    <button disabled={remoteAnswer == ""} on:click={() => bob.connect(remoteAnswer)}>Okay, I pasted it.</button>
+    <button disabled={remoteAnswer == ""} on:click={() => bob?.connect(remoteAnswer)}>Okay, I pasted it.</button>
   </div>
 
   <div class:hidden={activeRoom != "alice"}>
     <h3>ALICE: Paste the "offer" you received</h3>
     <input bind:value={remoteOffer}><br>
     <button on:click={async () => {
-      localAnswer = await alice.connect(remoteOffer);
+      localAnswer = await alice?.connect(remoteOffer) ?? "";
     }} disabled={remoteOffer == ""}>Okay, I pasted it.</button>
     <h3>Then, send your local answer to BOB</h3>
     <input bind:value={localAnswer}>
@@ -81,7 +93,7 @@
       placeholder="Send a message"
       on:keypress={event => {
         if (event.key == "Enter" && chatMessage) {
-          activeChat.send(chatMessage);
+          activeChat?.send(chatMessage);
           messages = [...messages, { author: "us", message: chatMessage }]
           chatMessage = ""
         }

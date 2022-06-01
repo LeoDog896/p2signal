@@ -59,6 +59,14 @@ export async function createPeerConnection(
   
   const eventSystem = eventSystemFactory<BaseEvents>()
 
+  connection.addEventListener("connectionstatechange", () => {
+    if (connection.connectionState === "disconnected") {
+      eventSystem.trigger("disconnect")
+    } else if (connection.connectionState === "failed") {
+      eventSystem.trigger("error", new Error("Connection failed."))
+    }
+  })
+
   if (type == "offerer") {
     const datachannel = connection.createDataChannel("init")
     const offer = await connection.createOffer()
