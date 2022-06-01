@@ -14,45 +14,39 @@
   let activeRoom: "create" | "bob" | "alice" | "chat" = "create"
   let activeChat: RTCDataChannel | null = null;
 
-  let bob: OffererPeerConnection | null = null;
-  let alice: AnswererPeerConnection | null = null;
+  let peer: OffererPeerConnection | AnswererPeerConnection | null = null;
 
-  async function activateBob() {
-    activeRoom = "bob"
-    bob = await createPeerConnection("offerer")
+  function activate() {
+    if (!peer) return
 
-    localOffer = bob.description;
-
-    bob.on("connect", channel => {
+    peer.on("connect", channel => {
       activeRoom = "chat";
       activeChat = channel;
     })
 
-    bob.on("message", message => messages = [...messages, { author: "them", message }])
+    peer.on("message", message => messages = [...messages, { author: "them", message }])
 
-    bob.on("disconnect", () => {
+    peer.on("disconnect", () => {
       activeRoom = "create"
       activeChat = null;
-      bob = null;
+      peer = null;
     })
+  }
+
+  async function activateBob() {
+    activeRoom = "bob"
+    peer = await createPeerConnection("offerer")
+
+    localOffer = peer.description;
+
+    activate()
   }
 
   async function activateAlice() {
     activeRoom = "alice"
-    alice = await createPeerConnection("answerer")
+    peer = await createPeerConnection("answerer")
 
-    alice.on("connect", channel => {
-      activeRoom = "chat";
-      activeChat = channel;
-    })
-
-    alice.on("message", message => messages = [...messages, { author: "them", message }])
-
-    alice.on("disconnect", () => {
-      activeRoom = "create"
-      activeChat = null;
-      alice = null;
-    })
+    activate()
   }
 </script>
 <div class="m-8">
@@ -68,14 +62,14 @@
     <br>
     <h3>Then, paste the "answer" you received</h3>
     <input bind:value={remoteAnswer}><br>
-    <button disabled={remoteAnswer == ""} on:click={() => bob?.connect(remoteAnswer)}>Okay, I pasted it.</button>
+    <button disabled={remoteAnswer == ""} on:click={() => peer?.connect(remoteAnswer)}>Okay, I pasted it.</button>
   </div>
 
   <div class:hidden={activeRoom != "alice"}>
     <h3>ALICE: Paste the "offer" you received</h3>
     <input bind:value={remoteOffer}><br>
     <button on:click={async () => {
-      localAnswer = await alice?.connect(remoteOffer) ?? "";
+      localAnswer = await peer?.connect(remoteOffer) ?? "";
     }} disabled={remoteOffer == ""}>Okay, I pasted it.</button>
     <h3>Then, send your local answer to BOB</h3>
     <input bind:value={localAnswer}>
