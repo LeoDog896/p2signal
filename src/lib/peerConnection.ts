@@ -1,5 +1,5 @@
 import { eventSystemFactory, type EventSystem } from "./eventSystemFactory"
-
+import { reduce, expand } from "./compressSDP"
 export type BaseEvents = {
   connect: RTCDataChannel;
   disconnect: void;
@@ -16,14 +16,14 @@ export type PeerConnection = {
 export type OffererPeerConnection = PeerConnection & {
   type: Extract<PeerConnectionType, "offerer">,
   offer: RTCSessionDescriptionInit;
-  description: RTCSessionDescription;
+  description: string;
   datachannel: RTCDataChannel;
-  connect: (description: RTCSessionDescription) => Promise<void>;
+  connect: (description: string) => Promise<void>;
 }
 
 export type AnswererPeerConnection = PeerConnection & {
   type: Extract<PeerConnectionType, "answerer">
-  connect: (description: RTCSessionDescription) => Promise<RTCSessionDescription>;
+  connect: (description: string) => Promise<string>;
 }
 
 export interface PeerConnectionOptions {
@@ -35,10 +35,10 @@ export interface PeerConnectionOptions {
  * @param connection The RTCPeerConnection.
  * @returns The local description of the peer.
  */
-const waitForIceCandidates = (connection: RTCPeerConnection): Promise<RTCSessionDescription> => new Promise(resolve => {
+const waitForIceCandidates = (connection: RTCPeerConnection): Promise<string> => new Promise(resolve => {
   connection.addEventListener("icecandidate", ({ candidate }) => {
     if (candidate == null && connection.localDescription !== null) {
-      resolve(connection.localDescription);
+      resolve(reduce(connection.localDescription));
     }
   })
 })
@@ -80,7 +80,7 @@ export async function createPeerConnection(
       description,
       datachannel,
       connect: async (description) => {
-        await connection.setRemoteDescription(description)
+        await connection.setRemoteDescription(expand(description))
       },
       ...eventSystem
     }
@@ -95,7 +95,7 @@ export async function createPeerConnection(
     type: "answerer",
     connection,
     connect: async (description) => {
-      await connection.setRemoteDescription(description)
+      await connection.setRemoteDescription(expand(description))
       await connection.setLocalDescription(await connection.createAnswer())
       return await waitForIceCandidates(connection)
     },

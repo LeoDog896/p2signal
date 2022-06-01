@@ -21,7 +21,7 @@
     activeRoom = "bob"
     bob = await createPeerConnection("offerer")
 
-    localOffer = JSON.stringify(bob.description);
+    localOffer = bob.description;
 
     bob.on("connect", channel => {
       activeRoom = "chat";
@@ -56,14 +56,14 @@
     <br>
     <h3>Then, paste the "answer" you received</h3>
     <input bind:value={remoteAnswer}><br>
-    <button disabled={remoteAnswer == ""} on:click={() => bob.connect(JSON.parse(remoteAnswer))}>Okay, I pasted it.</button>
+    <button disabled={remoteAnswer == ""} on:click={() => bob.connect(remoteAnswer)}>Okay, I pasted it.</button>
   </div>
 
   <div class:hidden={activeRoom != "alice"}>
     <h3>ALICE: Paste the "offer" you received</h3>
     <input bind:value={remoteOffer}><br>
     <button on:click={async () => {
-      localAnswer = JSON.stringify(await alice.connect(JSON.parse(remoteOffer)));
+      localAnswer = await alice.connect(remoteOffer);
     }} disabled={remoteOffer == ""}>Okay, I pasted it.</button>
     <h3>Then, send your local answer to BOB</h3>
     <input bind:value={localAnswer}>
