@@ -76,6 +76,7 @@ export async function createPeerConnection(
     const description = await waitForIceCandidates(connection);
 
     datachannel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
+    const check = peerConnectionAddEventListener(connection, "connectionstatechange", () => connection.connectionState === "connected")
 
     return {
       type: "offerer",
@@ -85,7 +86,7 @@ export async function createPeerConnection(
       datachannel,
       async connect(description) {
         await connection.setRemoteDescription(expand(description))
-        await peerConnectionAddEventListener(connection, "icecandidate", ({ candidate }) => candidate == null)
+        await check
       },
       ...eventSystem
     }

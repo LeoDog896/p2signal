@@ -1,9 +1,9 @@
 function reduceSDP(sdp: string): string {
-  return sdp.replaceAll("\r\n", "|")
+  return sdp.replaceAll("\r\n", "")
 }
 
 function expandSDP(sdp: string): string {
-  return sdp.replaceAll("|", "\r\n")
+  return sdp.split(/(?=\w=)/g).join("\r\n") + "\r\n"
 }
 
 /* eslint-disable no-case-declarations */
