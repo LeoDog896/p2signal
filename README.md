@@ -30,6 +30,45 @@ that allows for peers to identify themselves between reconnects and connect to m
       send("description", response)
     })
   }
+
+  {
+    // any peer
+
+    peer.on("connect", () => /* ... */)
+    peer.on("disconnect", () => /* ... */)
+  }
+  ```
+</details>
+
+<details>
+  <summary>Peer Connection handler</summary>
+
+  ```ts
+  // psuedo sending api: send(key, value). on(key, value => void)
+
+  { // peer 1
+    const peer = await createPeerConnection("offerer")
+
+    on("description", description => {
+      await peer.connect(description)
+    })
+  }
+
+  { // peer 2
+    const peer = await createPeerConnection("answerer")
+
+    on("description", description => {
+      const response = await peer.connect(description);
+      send("description", response)
+    })
+  }
+
+  {
+    // any peer
+
+    peer.on("connect", () => /* ... */)
+    peer.on("disconnect", () => /* ... */)
+  }
   ```
 </details>
 
