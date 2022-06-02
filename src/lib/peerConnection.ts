@@ -1,5 +1,7 @@
 import { eventSystemFactory, type EventSystem } from "./eventSystemFactory"
 import { reduce, expand } from "./compressSDP"
+import { peerConnectionAddEventListener } from "./waitForListener"
+
 export type BaseEvents = {
   connect: RTCDataChannel;
   disconnect: void;
@@ -75,20 +77,15 @@ export async function createPeerConnection(
 
     datachannel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
 
-    connection.addEventListener("connectionstatechange", () => {
-      if (connection.connectionState === "connected") {
-        eventSystem.trigger("connect", datachannel)
-      }
-    })
-
     return {
       type: "offerer",
       connection,
       offer,
       description,
       datachannel,
-      connect: async (description) => {
+      async connect(description) {
         await connection.setRemoteDescription(expand(description))
+        await peerConnectionAddEventListener(connection, "icecandidate", ({ candidate }) => candidate == null)
       },
       ...eventSystem
     }
@@ -102,7 +99,7 @@ export async function createPeerConnection(
   return {
     type: "answerer",
     connection,
-    connect: async (description) => {
+    async connect(description) {
       await connection.setRemoteDescription(expand(description))
       await connection.setLocalDescription(await connection.createAnswer())
       return await waitForIceCandidates(connection)
