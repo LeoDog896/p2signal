@@ -20,11 +20,13 @@ export type OffererPeerConnection = PeerConnection & {
   offer: RTCSessionDescriptionInit;
   description: string;
   datachannel: RTCDataChannel;
+  /** Connects to the answer description. If you await the promise, it also waits for the on("connect") event. */
   connect: (description: string) => Promise<void>;
 }
 
 export type AnswererPeerConnection = PeerConnection & {
   type: Extract<PeerConnectionType, "answerer">
+  /** Connects to the offer description. Awaiting will not listen to the on("connect") event */
   connect: (description: string) => Promise<string>;
 }
 
@@ -85,8 +87,9 @@ export async function createPeerConnection(
       description,
       datachannel,
       async connect(description) {
-        await connection.setRemoteDescription(expand(description))
-        await check
+        await connection.setRemoteDescription(expand(description));
+        eventSystem.trigger("connect", datachannel)
+        await check;
       },
       ...eventSystem
     }
