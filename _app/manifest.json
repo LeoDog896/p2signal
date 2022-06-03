@@ -1,6 +1,6 @@
 {
   ".svelte-kit/runtime/client/start.js": {
-    "file": "start-8a299431.js",
+    "file": "start-f211de38.js",
     "src": ".svelte-kit/runtime/client/start.js",
     "isEntry": true,
     "imports": [
@@ -9,8 +9,10 @@
     "dynamicImports": [
       "src/routes/__layout.svelte",
       ".svelte-kit/runtime/components/error.svelte",
-      "src/routes/chat.svelte",
-      "src/routes/connection.svelte",
+      "src/routes/docs/index.svelte",
+      "src/routes/examples/chat.svelte",
+      "src/routes/examples/connection.svelte",
+      "src/routes/examples/index.svelte",
       "src/routes/index.svelte"
     ]
   },
@@ -23,7 +25,7 @@
       "_index-b3b7356b.js"
     ],
     "css": [
-      "assets/pages/__layout.svelte-07b19305.css"
+      "assets/pages/__layout.svelte-19fb1928.css"
     ]
   },
   ".svelte-kit/runtime/components/error.svelte": {
@@ -35,18 +37,36 @@
       "_index-b3b7356b.js"
     ]
   },
-  "src/routes/chat.svelte": {
-    "file": "pages/chat.svelte-57988390.js",
-    "src": "src/routes/chat.svelte",
+  "src/routes/docs/index.svelte": {
+    "file": "pages/docs/index.svelte-58f6aa04.js",
+    "src": "src/routes/docs/index.svelte",
     "isEntry": true,
     "isDynamicEntry": true,
     "imports": [
       "_index-b3b7356b.js"
     ]
   },
-  "src/routes/connection.svelte": {
-    "file": "pages/connection.svelte-c1388664.js",
-    "src": "src/routes/connection.svelte",
+  "src/routes/examples/chat.svelte": {
+    "file": "pages/examples/chat.svelte-0aafb6d1.js",
+    "src": "src/routes/examples/chat.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-b3b7356b.js"
+    ]
+  },
+  "src/routes/examples/connection.svelte": {
+    "file": "pages/examples/connection.svelte-fbe212ab.js",
+    "src": "src/routes/examples/connection.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_index-b3b7356b.js"
+    ]
+  },
+  "src/routes/examples/index.svelte": {
+    "file": "pages/examples/index.svelte-810efbec.js",
+    "src": "src/routes/examples/index.svelte",
     "isEntry": true,
     "isDynamicEntry": true,
     "imports": [
@@ -54,7 +74,7 @@
     ]
   },
   "src/routes/index.svelte": {
-    "file": "pages/index.svelte-0fe4fade.js",
+    "file": "pages/index.svelte-f477cd83.js",
     "src": "src/routes/index.svelte",
     "isEntry": true,
     "isDynamicEntry": true,
