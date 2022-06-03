@@ -47,8 +47,11 @@ const waitForIceCandidates = (connection: RTCPeerConnection): Promise<string> =>
   })
 })
 
-export async function createPeerConnection(type: "offerer", options?: Partial<PeerConnectionOptions>): Promise<OffererPeerConnection>
-export async function createPeerConnection(type: "answerer", options?: Partial<PeerConnectionOptions>): Promise<AnswererPeerConnection>
+export async function createPeerConnection<T extends PeerConnectionType>(
+  type: T,
+  options?: Partial<PeerConnectionOptions>
+): Promise<T extends "answerer" ? AnswererPeerConnection : OffererPeerConnection>
+
 export async function createPeerConnection(
   type: PeerConnectionType,
   options?: Partial<PeerConnectionOptions>

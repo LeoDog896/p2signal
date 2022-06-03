@@ -1,6 +1,6 @@
 <!-- A raw example of peer connection. Essentially a port of stun-only-rtc with this library. -->
 <script lang="ts">
-  import { createPeerConnection, type AnswererPeerConnection, type OffererPeerConnection } from "$lib/peerConnection"
+  import { createPeerConnection, type AnswererPeerConnection, type OffererPeerConnection } from "$lib/connection/peerConnection"
 
   let messages: { author: "us" | "them", message: string }[] = []
 

@@ -32,7 +32,6 @@ function expandSDP(sdp: string): string {
   }).join("\r\n") + endSDP
 }
 
-/* eslint-disable no-case-declarations */
 export function reduce(desc: RTCSessionDescription) {
   const type = desc.type == "answer" ? "A" : "O"
 
