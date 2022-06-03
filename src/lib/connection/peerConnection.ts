@@ -1,6 +1,6 @@
-import { eventSystemFactory, type EventSystem } from "./eventSystemFactory"
-import { reduce, expand } from "./compressSDP"
-import { peerConnectionAddEventListener } from "./waitForListener"
+import { eventSystemFactory, type EventSystem } from "../events/eventSystemFactory"
+import { reduce, expand } from "../sdp/compressSDP"
+import { peerConnectionAddEventListener } from "../events/waitForListener"
 
 export type BaseEvents = {
   connect: RTCDataChannel;

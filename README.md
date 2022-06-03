@@ -44,9 +44,22 @@ that allows for peers to identify themselves between reconnects and connect to m
   <summary>Peer Connection handler</summary>
 
   ```ts
-  const peer = createPeer()
+  const peer = await createPeer<{
+    message: string;
+    response: string;
+  }>()
 
-  const connection = spawnConnection()
+  const connection = await peer.newConnection()
+
+  // ... use above example to connect to peers.
+
+  peer.broadcast("message", "Hello world!")
+
+  peer.on("message", (data, sender) => {
+    sender.send("response", "hello!")
+  })
+
+  peer.on("response", response => console.log(response))
   ```
 </details>
 
