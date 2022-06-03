@@ -13,6 +13,9 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
+    paths: {
+      base: "/p2signal"
+    },
 		prerender: {
 			default: true
 		}
