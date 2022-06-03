@@ -2,11 +2,11 @@
   export let links: { name: string, href: string }[] = [
     {
       name: "Chat",
-      href: "chat"
+      href: "examples/chat"
     }, 
     {
       name: "Low-level peer connection",
-      href: "connection"
+      href: "examples/connection"
     }
   ]
 </script>
