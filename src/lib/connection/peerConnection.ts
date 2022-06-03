@@ -2,20 +2,22 @@ import { eventSystemFactory, type EventSystem } from "../events/eventSystemFacto
 import { reduce, expand } from "../sdp/compressSDP"
 import { peerConnectionAddEventListener } from "../events/waitForListener"
 
+export type EventRecord = { [key: string]: unknown }
+export type DefaultEventRecord = { [key: string]: never }
+
 export type BaseEvents = {
   connect: RTCDataChannel;
   disconnect: void;
-  message: string;
   error: Error;
 }
 
 export type PeerConnectionType = "offerer" | "answerer"
 
-export type PeerConnection = {
+export type PeerConnection<T extends EventRecord = DefaultEventRecord> = {
   connection: RTCPeerConnection;
-} & EventSystem<BaseEvents>
+} & EventSystem<BaseEvents & T>
 
-export type OffererPeerConnection = PeerConnection & {
+export type OffererPeerConnection<T extends EventRecord = DefaultEventRecord> = PeerConnection<T> & {
   type: Extract<PeerConnectionType, "offerer">,
   offer: RTCSessionDescriptionInit;
   description: string;
@@ -24,7 +26,7 @@ export type OffererPeerConnection = PeerConnection & {
   connect: (description: string) => Promise<void>;
 }
 
-export type AnswererPeerConnection = PeerConnection & {
+export type AnswererPeerConnection<T extends EventRecord = DefaultEventRecord> = PeerConnection<T> & {
   type: Extract<PeerConnectionType, "answerer">
   /** Connects to the offer description. Awaiting will not listen to the on("connect") event */
   connect: (description: string) => Promise<string>;
@@ -47,15 +49,18 @@ const waitForIceCandidates = (connection: RTCPeerConnection): Promise<string> =>
   })
 })
 
-export async function createPeerConnection<T extends PeerConnectionType>(
+export async function createPeerConnection<E extends EventRecord = DefaultEventRecord, T extends PeerConnectionType = PeerConnectionType>(
   type: T,
   options?: Partial<PeerConnectionOptions>
-): Promise<T extends "answerer" ? AnswererPeerConnection : OffererPeerConnection>
+): Promise<
+  T extends "answerer" & "offerer" ? AnswererPeerConnection<E> | OffererPeerConnection<E>
+    : T extends "answerer" ? AnswererPeerConnection<E> : OffererPeerConnection<E>
+>
 
-export async function createPeerConnection(
+export async function createPeerConnection<E extends EventRecord = DefaultEventRecord>(
   type: PeerConnectionType,
   options?: Partial<PeerConnectionOptions>
-): Promise<OffererPeerConnection | AnswererPeerConnection> {
+): Promise<OffererPeerConnection<E> | AnswererPeerConnection<E>> {
 
   const iceServers = options?.iceServers?.map(server => typeof server == "string" ? { urls: server } : server) 
     ?? [{ urls: "stun:stun.l.google.com:19302" }];
@@ -80,7 +85,10 @@ export async function createPeerConnection(
     await connection.setLocalDescription(offer);
     const description = await waitForIceCandidates(connection);
 
-    datachannel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
+    datachannel.addEventListener("message", ({ data }) => {
+      const { type, content } = JSON.parse(data)
+      eventSystem.trigger(type, content)
+    })
     const check = peerConnectionAddEventListener(connection, "connectionstatechange", () => connection.connectionState === "connected")
 
     return {
@@ -100,7 +108,10 @@ export async function createPeerConnection(
 
   connection.addEventListener("datachannel", ({ channel }) => {
     eventSystem.trigger("connect", channel)
-    channel.addEventListener("message", ({ data }) => eventSystem.trigger("message", data))
+    channel.addEventListener("message", ({ data }) => {
+      const { type, content } = JSON.parse(data)
+      eventSystem.trigger(type, content)
+    })
   })
 
   return {

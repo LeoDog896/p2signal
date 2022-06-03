@@ -14,7 +14,11 @@
   let activeRoom: "create" | "bob" | "alice" | "chat" = "create"
   let activeChat: RTCDataChannel | null = null;
 
-  let peer: OffererPeerConnection | AnswererPeerConnection | null = null;
+  let peer: OffererPeerConnection<Data> | AnswererPeerConnection<Data> | null = null;
+
+  type Data = {
+    message: string
+  }
 
   function activate() {
     if (!peer) return
@@ -35,7 +39,7 @@
 
   async function activateBob() {
     activeRoom = "bob"
-    peer = await createPeerConnection("offerer")
+    peer = await createPeerConnection<Data>("offerer");
 
     localOffer = peer.description;
 
@@ -44,7 +48,7 @@
 
   async function activateAlice() {
     activeRoom = "alice"
-    peer = await createPeerConnection("answerer")
+    peer = await createPeerConnection<Data>("answerer")
 
     activate()
   }
