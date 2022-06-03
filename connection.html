@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta http-equiv="content-security-policy" content="">
+	<link rel="stylesheet" href="/_app/assets/pages/__layout.svelte-07b19305.css">
+	<link rel="modulepreload" href="/_app/start-8a299431.js">
+	<link rel="modulepreload" href="/_app/chunks/index-b3b7356b.js">
+	<link rel="modulepreload" href="/_app/pages/__layout.svelte-179a9c91.js">
+	<link rel="modulepreload" href="/_app/pages/connection.svelte-c1388664.js">
+	</head>
+	<body class="h-full w-full overflow-x-hidden bg-gray-50">
+		<div>
+
+
+
+
+<div class="m-8"><div><h3>Create or join a room?</h3>
+    <button>BOB: Create</button>
+    <button>ALICE: Join</button></div>
+
+  <div class="hidden"><h3>BOB: Send your local offer to ALICE</h3>
+    <input readonly value="">
+    <br>
+    <h3>Then, paste the &quot;answer&quot; you received</h3>
+    <input value=""><br>
+    <button disabled>Okay, I pasted it.</button></div>
+
+  <div class="hidden"><h3>ALICE: Paste the &quot;offer&quot; you received</h3>
+    <input value=""><br>
+    <button disabled>Okay, I pasted it.</button>
+    <h3>Then, send your local answer to BOB</h3>
+    <input value=""></div>
+
+  <div class="hidden"><h1 class="text-2xl">Chat</h1>
+    <div></div>
+    <input placeholder="Send a message" value=""></div></div>
+
+
+		<script type="module" data-hydrate="yol55v">
+		import { start } from "/_app/start-8a299431.js";
+		start({
+			target: document.querySelector('[data-hydrate="yol55v"]').parentNode,
+			paths: {"base":"","assets":""},
+			session: {},
+			route: true,
+			spa: false,
+			trailing_slash: "never",
+			hydrate: {
+				status: 200,
+				error: null,
+				nodes: [
+					import("/_app/pages/__layout.svelte-179a9c91.js"),
+						import("/_app/pages/connection.svelte-c1388664.js")
+				],
+				params: {},
+				routeId: "connection"
+			}
+		});
+	</script></div>
+	</body>
+</html>
